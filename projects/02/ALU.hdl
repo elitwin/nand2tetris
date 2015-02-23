@@ -42,5 +42,39 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // Store negated versions of x and y
+    Not16(in=x, out=negx);
+    Not16(in=y, out=negy);
+    
+    /* Handle nx/zx and ny/zy flags with 4Way Muxes
+        zx   nx   out
+        0    0    x
+        0    1    negx
+        1    0    0 (false)
+        1    1    1 (not false)
+    */
+    Mux4Way16(a=x, b=negx, c=false, d=true, sel[1]=zx, sel[0]=nx, out=znx);
+    Mux4Way16(a=y, b=negy, c=false, d=true, sel[1]=zy, sel[0]=ny, out=zny);
+    
+    // Store +, & and negated versions of both
+    Add16(a=znx, b=zny, out=sumxy);
+    Not16(in=sumxy, out=negsumxy);
+    And16(a=znx, b=zny, out=andxy);
+    Not16(in=andxy, out=negandxy);
+    
+    /* Handle f and no with a 4Way Mux - also set ng OUT here by looking at highest order bit
+        f    no   out
+        0    0    And xy
+        0    1    Neg(And xy)
+        1    0    Add xy
+        1    1    Neg(Add xy)
+    */
+    Mux4Way16(a=andxy, b=negandxy, c=sumxy, d=negsumxy, sel[1]=f, sel[0]=no, out=out, out[15]=ng, out[0..7]=lsb, out[8..15]=msb);
+    
+    // Calculate zr OUT by checking out[0..15] with Or8Way chips 
+    // Needed to split out into low byte and high byte since no Or16Way chip was built
+    Or8Way(in=lsb, out=lsbtrue);
+    Or8Way(in=msb, out=msbtrue);
+    Or(a=lsbtrue, b=msbtrue, out=zrinv);
+    Not(in=zrinv, out=zr);
 }
