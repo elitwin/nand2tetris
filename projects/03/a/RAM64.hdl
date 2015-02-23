@@ -15,5 +15,22 @@ CHIP RAM64 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Address is xxxyyy where 
+    //    xxx == MSB == address[0..2]
+    //    yyy == LSB == address[3..5]
+    // Use MSB of address to determine which RAM8 chip to select
+    DMux8Way(in=load, sel=address[0..2], a=m0, b=m1, c=m2, d=m3, e=m4, f=m5, g=m6, h=m7);
+    
+    // Load the RAM8 chip using MSB and the register on that chip using LSB
+    RAM8(in=in, load=m0, address=address[3..5], out=r0);
+    RAM8(in=in, load=m1, address=address[3..5], out=r1);
+    RAM8(in=in, load=m2, address=address[3..5], out=r2);
+    RAM8(in=in, load=m3, address=address[3..5], out=r3);
+    RAM8(in=in, load=m4, address=address[3..5], out=r4);
+    RAM8(in=in, load=m5, address=address[3..5], out=r5);
+    RAM8(in=in, load=m6, address=address[3..5], out=r6);
+    RAM8(in=in, load=m7, address=address[3..5], out=r7);
+    
+    // MSB of Address then determines which chip/register to return
+    Mux8Way16(a=r0, b=r1, c=r2, d=r3, e=r4, f=r5, g=r6, h=r7, sel=address[0..2], out=out);    
 }
