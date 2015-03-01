@@ -18,7 +18,7 @@ CHIP PC {
     PARTS:
     // Increment
     Inc16(in=feedback, out=i);
-    
+
     // Inc or out[t]
     Mux16(a=feedback, b=i, sel=inc, out=io);
     // Load or incmux

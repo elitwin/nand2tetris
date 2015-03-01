@@ -7,7 +7,7 @@
  * The ALU (Arithmetic Logic Unit).
  * Computes one of the following functions:
  * x+y, x-y, y-x, 0, 1, -1, x, y, -x, -y, !x, !y,
- * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs, 
+ * x+1, y+1, x-1, y-1, x&y, x|y on two 16-bit inputs,
  * according to 6 input bits denoted zx,nx,zy,ny,f,no.
  * In addition, the ALU computes two 1-bit outputs:
  * if the ALU output == 0, zr is set to 1; otherwise zr is set to 0;
@@ -27,8 +27,8 @@
 // if (out < 0) set ng = 1
 
 CHIP ALU {
-    IN  
-        x[16], y[16],  // 16-bit inputs        
+    IN
+        x[16], y[16],  // 16-bit inputs
         zx, // zero the x input?
         nx, // negate the x input?
         zy, // zero the y input?
@@ -36,7 +36,7 @@ CHIP ALU {
         f,  // compute out = x + y (if 1) or x & y (if 0)
         no; // negate the out output?
 
-    OUT 
+    OUT
         out[16], // 16-bit output
         zr, // 1 if (out == 0), 0 otherwise
         ng; // 1 if (out < 0),  0 otherwise
@@ -45,7 +45,7 @@ CHIP ALU {
     // Store negated versions of x and y
     Not16(in=x, out=negx);
     Not16(in=y, out=negy);
-    
+
     /* Handle nx/zx and ny/zy flags with 4Way Muxes
         zx   nx   out
         0    0    x
@@ -55,14 +55,15 @@ CHIP ALU {
     */
     Mux4Way16(a=x, b=negx, c=false, d=true, sel[1]=zx, sel[0]=nx, out=znx);
     Mux4Way16(a=y, b=negy, c=false, d=true, sel[1]=zy, sel[0]=ny, out=zny);
-    
+
     // Store +, & and negated versions of both
     Add16(a=znx, b=zny, out=sumxy);
     Not16(in=sumxy, out=negsumxy);
     And16(a=znx, b=zny, out=andxy);
     Not16(in=andxy, out=negandxy);
-    
-    /* Handle f and no with a 4Way Mux - also set ng OUT here by looking at highest order bit
+
+    /* Handle f and no with a 4Way Mux - also set ng OUT here by looking at
+       highest order bit
         f    no   out
         0    0    And xy
         0    1    Neg(And xy)
@@ -70,9 +71,8 @@ CHIP ALU {
         1    1    Neg(Add xy)
     */
     Mux4Way16(a=andxy, b=negandxy, c=sumxy, d=negsumxy, sel[1]=f, sel[0]=no, out=out, out[15]=ng, out[0..7]=lsb, out[8..15]=msb);
-    
-    // Calculate zr OUT by checking out[0..15] with Or8Way chips 
-    // Needed to split out into low byte and high byte since no Or16Way chip was built
+    // Calculate zr OUT by checking out[0..15] with Or8Way chips
+    // Need to split out into low byte/high byte since no Or16Way chip was built
     Or8Way(in=lsb, out=lsbtrue);
     Or8Way(in=msb, out=msbtrue);
     Or(a=lsbtrue, b=msbtrue, out=zrinv);
