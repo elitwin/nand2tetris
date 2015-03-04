@@ -43,12 +43,12 @@
 
 (FILL)
         // Reinitialize screen_ptr if we finished drawing all pixels
-	@screen_ptr
-	D=M
-	@screen_end
-	D=D-M
-	@RESET
-	D;JEQ
+        @screen_ptr
+        D=M
+        @screen_end
+        D=D-M
+        @RESET
+        D;JEQ
 
         @color
         D=M
