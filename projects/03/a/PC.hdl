@@ -23,7 +23,7 @@ CHIP PC {
     Mux16(a=feedback, b=i, sel=inc, out=io);
     // Load or incmux
     Mux16(a=io, b=in, sel=load, out=lio);
-    // Reset or incloadmux
+    // Reset or loadincmux
     Mux16(a=lio, b=false, sel=reset, out=rlio);
 
     // Store in register
