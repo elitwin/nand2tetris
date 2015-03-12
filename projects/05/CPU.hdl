@@ -48,7 +48,7 @@ CHIP CPU {
     // 3..5   (d) 3=M, 4=D, 5=A as destination
     // 0..2   (j) jump condition
 
-    // Load A register with either memory or ALU output
+    // Load A register with A-instruction (15-bit constant) or ALU output
     Not(in=instruction[15], out=aInst);
     Or(a=aInst, b=instruction[5], out=loadA);
     Mux16(a=instruction, b=outALU, sel=instruction[15], out=outMuxA);
@@ -61,8 +61,8 @@ CHIP CPU {
     // Use data in A register or Memory based on 'a' flag
     Mux16(a=outA, b=inM, sel=instruction[12], out=outMuxAM);
 
-    ALU(x  = outD,
-        y  = outMuxAM,
+    ALU(x = outD,
+        y = outMuxAM,
         zx = instruction[11],
         nx = instruction[10],
         zy = instruction[9],
@@ -70,8 +70,8 @@ CHIP CPU {
         f  = instruction[7],
         no = instruction[6],
         out = outALU, out = outM,
-        zr  = zr,
-        ng =  ng);
+        zr = zr,
+        ng = ng);
 
     // Set writeM output for a C-instruction
     And(a=instruction[15], b=instruction[3], out=writeM);
